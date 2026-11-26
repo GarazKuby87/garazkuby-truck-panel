@@ -1,0 +1,16 @@
+{
+ "name": "Truck Panel ETS2/ATS",
+ "short_name": "Truck Panel",
+ "start_url": "/",
+ "display": "fullscreen",
+ "orientation": "landscape",
+ "background_color": "#121212",
+ "theme_color": "#121212",
+ "icons": [
+  {
+   "src": "/ikona.svg",
+   "sizes": "any",
+   "type": "image/svg+xml"
+  }
+ ]
+}

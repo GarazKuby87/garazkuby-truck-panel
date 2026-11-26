@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="pl" translate="no">
+<head>
+<meta name="google" content="notranslate">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#141414">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/ikona.svg">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<title>Truck Panel</title>
+<style>
+  /* Garażowy klimat, ale spokojnie: grafit, ciepła rdza jako akcent, cienka taśma ostrzegawcza.
+     Bez chromu i neonów. Kolor pojawia się dopiero wtedy, gdy coś jest włączone: wtedy świeci cały przycisk. */
+  :root {
+    --tlo: #121212;
+    --plyta: #1c1c1c;
+    --plyta-2: #232323;
+    --rama: #2f2f2f;
+    --rama-jasna: #3d3d3d;
+    --akcent: #d0742f;        /* rdza */
+    --tekst: #ecebe8;
+    --tekst-szary: #9a9893;
+    --tekst-ciemny: #6c6a66;
+    --nieb: #3fb6ff;
+    --zolty: #ffcc33;
+    --zielony: #3ddc6f;
+    --czerwony: #ff4438;
+    --pomaranczowy: #ff9a1f;
+    --font: "Barlow Semi Condensed", "Roboto Condensed", "sans-serif-condensed", "Arial Narrow", sans-serif;
+    --liczby: "Saira Condensed", "Roboto Condensed", "sans-serif-condensed", sans-serif;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--tlo); color: var(--tekst); font-family: var(--font); }
+  html { height: 100%; overflow: hidden; }
+  /* Skalowanie: układ liczony zawsze dla ekranu wzorcowego (--vw/--vh), a całość powiększana o --z (skrypt w <head>). */
+  body { width: calc(var(--vw, 1vw) * 100); height: calc(var(--vh, 1vh) * 100); zoom: var(--z, 1); }
+  body { display: flex; flex-direction: column; overflow: hidden; user-select: none; -webkit-user-select: none; touch-action: manipulation;
+         background: radial-gradient(ellipse at 15% -10%, rgba(208,116,47,.13), transparent 55%), var(--tlo); }
+  button { font-family: inherit; }
+
+  header { display: flex; align-items: center; gap: 14px; padding: 10px 14px 8px; }
+  .marka { display: flex; flex-direction: column; line-height: .95; white-space: nowrap; }
+  .marka b { font: 800 24px var(--liczby); letter-spacing: 2px; text-transform: uppercase; }
+  .marka span { font: 600 11px var(--font); letter-spacing: 3.5px; color: var(--akcent); text-transform: uppercase; }
+  .zegar { font: 700 22px var(--liczby); white-space: nowrap; padding-left: 14px; border-left: 1px solid var(--rama-jasna); }
+  .zegar:empty { display: none; }
+  .miejsce { display: flex; align-items: center; gap: 9px; min-width: 0; white-space: nowrap; overflow: hidden; }
+  .miejsce .flaga { font-size: 28px; line-height: 1; }
+  .miejsce b { font: 700 24px var(--liczby); letter-spacing: .5px; }
+  .miejsce span { font: 500 17px var(--font); color: var(--tekst-szary); overflow: hidden; text-overflow: ellipsis; }
+  .prawa { display: flex; gap: 6px; margin-left: auto; flex: none; }
+  .wybor { display: flex; border: 1px solid var(--rama-jasna); border-radius: 8px; overflow: hidden; }
+  .wybor button { font: 700 15px var(--font); letter-spacing: 1px; color: var(--tekst-szary); background: var(--plyta);
+                  border: 0; padding: 0 12px; height: 40px; }
+  .wybor button + button { border-left: 1px solid var(--rama-jasna); }
+  .wybor button.aktywna { color: #111; background: var(--akcent); }
+  .ikona-btn { font-size: 19px; width: 42px; height: 42px; padding: 0; background: var(--plyta); color: var(--tekst);
+               border: 1px solid var(--rama-jasna); border-radius: 8px; }
+  .tasma { height: 4px; flex: none; opacity: .7;
+           background: repeating-linear-gradient(-45deg, var(--zolty) 0 10px, #141414 10px 20px); }
+
+  main { flex: 1; display: flex; flex-direction: column; gap: 12px; padding: 10px 14px; min-height: 0; }
+  #przyciski { flex: 0 0 44%; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+  #przyciski section { flex: var(--wiersze); }
+  section { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+  section > h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 6px;
+                 font: 600 13px var(--font); letter-spacing: 3px; text-transform: uppercase; color: var(--tekst-szary); }
+  section > h2::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--rama-jasna), transparent); }
+  .siatka { display: grid; gap: 10px; flex: 1; min-height: 0; grid-auto-rows: minmax(0, 1fr); }
+  @media (orientation: landscape) {
+    #przyciski { flex-direction: row; gap: 14px; }
+    #przyciski section { flex: var(--kolumny); }
+  }
+  @media (orientation: portrait) { #przyciski { flex: 1; } }
+
+  /* ---- przycisk: spokojna płytka; włączony = cały świeci kolorem kontrolki ---- */
+  .przycisk {
+    --k: var(--zielony);
+    position: relative; display: flex; align-items: center; gap: 12px; text-align: left; min-height: 0; overflow: hidden;
+    padding: 4px 14px; border-radius: 10px; background: var(--plyta-2); border: 1px solid var(--rama-jasna);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 2px 0 #0a0a0a;
+    color: var(--tekst); font: 600 19px var(--font); letter-spacing: .5px; text-transform: uppercase;
+    transition: transform .05s, background .15s, box-shadow .15s;
+  }
+  .przycisk.wcisniety { transform: translateY(2px); box-shadow: inset 0 2px 6px rgba(0,0,0,.6); }
+  .opis { display: flex; flex-direction: column; gap: 2px; min-width: 0; line-height: 1.1; }
+  .stan { font: 600 12px var(--font); letter-spacing: 2px; color: var(--tekst-ciemny); }
+  .stan:empty { display: none; }
+  .ikona { width: 30px; height: 30px; flex: none; color: var(--tekst-szary);
+           fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .ikona .pelna { fill: currentColor; stroke: none; }
+  .ikona text { fill: currentColor; stroke: none; font: 800 7.5px var(--font); text-anchor: middle; }
+  .przycisk.wl {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--k) 78%, #000), color-mix(in srgb, var(--k) 52%, #000));
+    border-color: var(--k); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.55);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--k) 55%, transparent), inset 0 1px 0 rgba(255,255,255,.25);
+  }
+  .wl .ikona { color: #fff; filter: drop-shadow(0 0 4px rgba(255,255,255,.7)); }
+  .wl .stan { color: rgba(255,255,255,.85); }
+  .przycisk.wl.migaj { animation: miganie .8s steps(1) infinite; }
+  @keyframes miganie { 50% { background: var(--plyta-2); border-color: var(--rama-jasna); box-shadow: none; color: var(--tekst); } }
+  .chwila .ikona, .trzymaj .ikona { color: var(--tekst); }
+  .przycisk.chwila, .przycisk.trzymaj { border-left: 4px solid var(--akcent); }
+  .kolor-czerwony { --k: var(--czerwony); } .kolor-niebieski { --k: var(--nieb); }
+  .kolor-zolty { --k: var(--zolty); } .kolor-zielony { --k: var(--zielony); } .kolor-pomaranczowy { --k: var(--pomaranczowy); }
+
+  /* ---- klaster: GPS + deska ---- */
+  #klaster { flex: 1; display: grid; min-height: 0; gap: 10px; grid-template-columns: 1.9fr 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; }
+  @media (orientation: portrait) {
+    #klaster { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1.3fr 1fr 1fr; }
+    #klaster .gps { grid-column: 1 / -1; grid-row: auto; }
+  }
+  .kafel { position: relative; min-width: 0; min-height: 0; overflow: hidden; border-radius: 12px; padding: 10px 14px;
+           display: flex; flex-direction: column; background: var(--plyta); border: 1px solid var(--rama);
+           border-top: 3px solid var(--rama-jasna); }
+  .kafel > * { flex-shrink: 0; }
+  .kafel h3 { margin: 0; font: 600 13px var(--font); letter-spacing: 2.5px; text-transform: uppercase; color: var(--tekst-szary); }
+  .kafel .duza { font: 700 clamp(28px, calc(var(--u, 1vmin) * 6.6), 70px) / 1 var(--liczby); font-variant-numeric: tabular-nums; margin-top: auto; white-space: nowrap; }
+  .kafel .duza small { font-size: .38em; font-weight: 500; color: var(--tekst-szary); margin-left: 4px; letter-spacing: 1px; }
+  .kafel .male { font: 500 clamp(13px, calc(var(--u, 1vmin) * 2.3), 19px) / 1.3 var(--font); color: var(--tekst-szary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kafel .male b { color: var(--tekst); font-family: var(--liczby); font-weight: 700; }
+  .kafel .male small { color: var(--tekst-ciemny); }
+  .pasek-wsk { height: 7px; border-radius: 4px; background: #2a2a2a; margin: 8px 0 4px; overflow: hidden; }
+  .pasek-wsk i { display: block; height: 100%; width: 0; border-radius: 4px; background: var(--zielony); transition: width .4s; }
+  .kafel.ostrzezenie { border-top-color: var(--zolty); } .kafel.ostrzezenie .duza { color: var(--zolty); }
+  .kafel.alarm { border-top-color: var(--czerwony); border-color: var(--czerwony); animation: alarm 1s steps(1) infinite; }
+  .kafel.alarm .duza { color: var(--czerwony); }
+  @keyframes alarm { 50% { border-color: var(--rama); } }
+  .ok { color: var(--zielony) !important; } .zle { color: var(--czerwony) !important; }
+
+  .gps { grid-row: 1 / 3; border-top-color: var(--akcent); }
+  .gps h3 { color: var(--akcent); }
+  .gps .cel { font: 700 clamp(22px, calc(var(--u, 1vmin) * 4.4), 46px) / 1.05 var(--liczby); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .gps .firma { font: 500 clamp(14px, calc(var(--u, 1vmin) * 2.6), 22px) var(--font); color: var(--tekst-szary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .gps .km { font: 700 clamp(40px, calc(var(--u, 1vmin) * 10), 110px) / .95 var(--liczby); color: var(--zolty); white-space: nowrap; }
+  .gps .km small { font-size: .3em; color: var(--tekst-szary); margin-left: 6px; }
+  .gps .czas { font: 700 clamp(16px, calc(var(--u, 1vmin) * 3), 30px) var(--liczby); }
+  .gps .pasek-wsk i { background: var(--akcent); }
+  .gps .srodek { display: flex; align-items: flex-end; gap: 22px; margin-top: auto; min-width: 0; }
+  .gps .srodek > div:first-child { flex: none; }
+  .gps .wiersze { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; flex: 1; min-width: 0; padding-bottom: 4px; }
+  .gps .wiersze span:nth-child(odd) { color: var(--tekst-szary); font: 500 clamp(12px, calc(var(--u, 1vmin) * 2.1), 17px) var(--font); letter-spacing: 1px; text-transform: uppercase; align-self: center; }
+  .gps .wiersze span:nth-child(even) { font: 700 clamp(14px, calc(var(--u, 1vmin) * 2.6), 22px) var(--liczby); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .gps .pusto { margin: auto 0; font: 600 clamp(18px, calc(var(--u, 1vmin) * 3.4), 30px) var(--font); color: var(--tekst-szary); }
+
+  .predkosc .rzad { display: flex; align-items: flex-end; gap: 12px; margin-top: auto; }
+  .predkosc .duza { margin-top: 0; }
+  .predkosc.za-szybko .duza { color: var(--czerwony); }
+  /* znak ograniczenia: europejski okrągły, w ATS amerykańska tablica SPEED LIMIT */
+  .znak { flex: none; width: clamp(40px, calc(var(--u, 1vmin) * 8), 74px); aspect-ratio: 1; border-radius: 50%; background: #fff; margin-bottom: 4px;
+          border: clamp(5px, calc(var(--u, 1vmin) * 1), 9px) solid #d0211b; color: #111; display: grid; place-items: center; font: 800 clamp(16px, calc(var(--u, 1vmin) * 3.4), 32px) var(--liczby); }
+  .ats .znak { border-radius: 6px; border: 2px solid #111; box-shadow: 0 0 0 2px #fff; aspect-ratio: .8; align-content: center; gap: 0;
+               font-size: clamp(18px, calc(var(--u, 1vmin) * 3.8), 36px); line-height: .9; }
+  .ats .znak::before { content: "SPEED LIMIT"; font: 700 clamp(6px, calc(var(--u, 1vmin) * 1.1), 10px) / 1 var(--font); text-align: center; width: 70%; }
+  .znak.brak { visibility: hidden; }
+  .silnik-wartosci { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; margin-top: auto; }
+  .silnik-wartosci div { font: 700 clamp(18px, calc(var(--u, 1vmin) * 3.6), 36px) / 1.05 var(--liczby); white-space: nowrap; }
+  .silnik-wartosci div small { display: block; font: 500 clamp(11px, calc(var(--u, 1vmin) * 1.8), 15px) var(--font); color: var(--tekst-szary); letter-spacing: 1px; text-transform: uppercase; }
+  .przebieg { cursor: pointer; }
+  .przebieg .duza { font-size: clamp(26px, calc(var(--u, 1vmin) * 5.8), 60px); }
+
+  footer { display: flex; align-items: center; gap: 10px; padding: 6px 14px calc(10px + env(safe-area-inset-bottom));
+           font-size: 13px; color: var(--tekst-szary); }
+  .polaczenie { display: flex; align-items: center; gap: 6px; }
+  .polaczenie i { width: 9px; height: 9px; border-radius: 50%; background: var(--zielony); }
+  .polaczenie.blad { color: var(--czerwony); } .polaczenie.blad i { background: var(--czerwony); }
+  .autor { color: var(--tekst-ciemny); letter-spacing: 1px; }
+  footer button { font: 600 13px var(--font); letter-spacing: 1px; color: var(--tekst-szary); background: none;
+                  border: 1px solid var(--rama-jasna); border-radius: 6px; padding: 6px 10px; text-transform: uppercase; }
+  footer .odstep { margin-left: auto; }
+</style>
+<script>
+  // Jeden współczynnik dla całego panelu: ekran wzorcowy 1100x600 (poziomo) albo 600x1000 (pionowo)
+  // wpasowany w prawdziwy ekran. Telefon: mniejszy, tablet/monitor: większy, proporcje zawsze te same.
+  (function () {
+    function skaluj() {
+      var w = window.innerWidth, h = window.innerHeight, pion = h > w;
+      var z = Math.min(w / (pion ? 600 : 1100), h / (pion ? 1000 : 600));
+      z = Math.max(0.5, Math.min(z, 2.5));
+      var r = document.documentElement.style;
+      r.setProperty("--z", z);
+      r.setProperty("--vw", (w / z / 100) + "px");
+      r.setProperty("--vh", (h / z / 100) + "px");
+      r.setProperty("--u", (Math.min(w, h) / z / 100) + "px");  // jednostka cyfr: krótszy bok, żeby w pionie nie rosły ponad kafle
+    }
+    skaluj();
+    window.addEventListener("resize", skaluj);
+    if (window.visualViewport) visualViewport.addEventListener("resize", skaluj);
+  })();
+</script>
+</head>
+<body>
+<header>
+  <div class="marka"><b id="nazwa-gry">ETS 2</b><span>Truck Panel</span></div>
+  <div class="zegar" id="zegar"></div>
+  <div class="miejsce" id="miejsce"></div>
+  <div class="prawa">
+    <div class="wybor" id="gry"></div>
+    <div class="wybor" id="jezyki"><button data-j="pl">PL</button><button data-j="en">EN</button></div>
+    <button class="ikona-btn" id="pelny">⛶</button>
+  </div>
+</header>
+<div class="tasma"></div>
+<main>
+  <div id="przyciski"></div>
+  <div id="klaster">
+    <div class="kafel gps" id="k-gps"></div>
+    <div class="kafel predkosc" id="k-predkosc"><h3 data-t="predkosc"></h3>
+      <div class="rzad"><div class="duza" id="v-predkosc">–</div><div class="znak brak" id="v-limit"></div></div>
+      <div class="male" id="v-bieg"></div></div>
+    <div class="kafel" id="k-paliwo"><h3 data-t="paliwo"></h3>
+      <div class="duza" id="v-paliwo">–</div><div class="pasek-wsk"><i id="p-paliwo"></i></div>
+      <div class="male" id="v-paliwo2"></div></div>
+    <div class="kafel" id="k-spalanie"><h3 data-t="spalanie"></h3>
+      <div class="duza" id="v-spalanie">–</div><div class="male" id="v-zasieg"></div></div>
+    <div class="kafel" id="k-powietrze"><h3 data-t="powietrze"></h3>
+      <div class="duza" id="v-powietrze">–</div><div class="pasek-wsk"><i id="p-powietrze"></i></div>
+      <div class="male" id="v-olej"></div></div>
+    <div class="kafel" id="k-silnik"><h3 data-t="silnik"></h3>
+      <div class="silnik-wartosci"><div id="v-woda">–</div><div id="v-olejc">–</div><div id="v-aku">–</div><div id="v-adblue">–</div></div></div>
+    <div class="kafel przebieg" id="k-przebieg"><h3 data-t="przebieg"></h3>
+      <div class="duza" id="v-przebieg">–</div><div class="male" id="v-trip"></div></div>
+  </div>
+</main>
+<footer>
+  <div class="polaczenie" id="polaczenie"><i></i><span></span></div>
+  <span class="autor">Garaż Kuby</span>
+  <button id="pikanie" class="odstep"></button>
+  <button id="zeruj"></button>
+</footer>
+
+<script>
+const TELEMETRIA_MS = 300;        // co tyle pytamy grę o stan
+const ZAUFAJ_STUKNIECIU_MS = 800; // po stuknięciu gra potrzebuje chwili, zanim stan dojdzie do telemetrii
+const DEMO = new URLSearchParams(location.search).has("demo");
+const $ = (id) => document.getElementById(id);
+const zapisz = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+const wczytaj = (k, d) => { try { return localStorage.getItem(k) ?? d; } catch (e) { return d; } };
+
+// ---------------- język ----------------
+const TEKSTY = {
+  pl: {
+    predkosc: "Prędkość", paliwo: "Paliwo", spalanie: "Spalanie śr.", powietrze: "Ciśnienie powietrza", silnik: "Silnik", przebieg: "Przebieg",
+    woda: "woda", olej: "olej", akumulator: "akumulator", adblue: "AdBlue", polaczono: "połączono", czekam: "czekam na grę na PC…",
+    brak_pc: "brak połączenia z PC", nie_gra: "kliknij w okno gry na PC", pikanie: "Pikanie cofania", wl: "WŁ", wyl: "WYŁ",
+    zeruj: "Wyzeruj kontrolki", gps: "GPS · cel", z: "z", czekam_dane: "czekam na dane z gry…", brak_trasy: "brak trasy w nawigacji",
+    punkt: "Punkt na mapie", jazdy: "jazdy", przyjazd: "Przyjazd", termin: "Termin", ladunek: "Ładunek", zarobek: "Zarobek",
+    bieg: "bieg", tempomat: "tempomat", zasieg: "zasięg", tankuj: "TANKUJ przed celem", dojedziesz: "dojedziesz",
+    uszkodzenia: "uszkodzenia", trip_zeruj: "przytrzymaj = zeruj", z_ilu: "z", kolo: "k.", pelny: "Pełny ekran",
+    dni: ["pon", "wt", "śr", "czw", "pt", "sob", "nd"], h: "h", min: "min", przytrzymaj: "PRZYTRZYMAJ", trzymaj: "TRZYMAJ",
+  },
+  en: {
+    predkosc: "Speed", paliwo: "Fuel", spalanie: "Avg. consumption", powietrze: "Air pressure", silnik: "Engine", przebieg: "Odometer",
+    woda: "coolant", olej: "oil", akumulator: "battery", adblue: "AdBlue", polaczono: "connected", czekam: "waiting for the game on PC…",
+    brak_pc: "no connection to PC", nie_gra: "click the game window on PC", pikanie: "Reverse beep", wl: "ON", wyl: "OFF",
+    zeruj: "Reset switches", gps: "GPS · destination", z: "from", czekam_dane: "waiting for game data…", brak_trasy: "no route in navigation",
+    punkt: "Map waypoint", jazdy: "driving", przyjazd: "Arrival", termin: "Deadline", ladunek: "Cargo", zarobek: "Income",
+    bieg: "gear", tempomat: "cruise", zasieg: "range", tankuj: "REFUEL before destination", dojedziesz: "you'll make it",
+    uszkodzenia: "damage", trip_zeruj: "hold = reset", z_ilu: "of", kolo: "near", pelny: "Fullscreen",
+    dni: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], h: "h", min: "min", przytrzymaj: "HOLD", trzymaj: "HOLD",
+  },
+};
+let jezyk = new URLSearchParams(location.search).get("lang") || wczytaj("jezyk", (navigator.language || "en").startsWith("pl") ? "pl" : "en");
+const t = (k) => TEKSTY[jezyk][k] ?? TEKSTY.pl[k] ?? k;
+const tp = (obj, pole) => (jezyk === "en" && obj[pole + "_en"]) || obj[pole]; // pola z profile.json: etykieta / etykieta_en
+const STANY_USA = { AR: "Arkansas", AZ: "Arizona", CA: "California", CO: "Colorado", IA: "Iowa", ID: "Idaho", IL: "Illinois",
+  KS: "Kansas", LA: "Louisiana", MO: "Missouri", MT: "Montana", NE: "Nebraska", NM: "New Mexico", NV: "Nevada", OK: "Oklahoma",
+  OR: "Oregon", SD: "South Dakota", TX: "Texas", UT: "Utah", WA: "Washington", WY: "Wyoming", ND: "North Dakota", MN: "Minnesota", WI: "Wisconsin" };
+
+// ---------------- jednostki: serwer daje metryczne, ATS pokazuje amerykańskie ----------------
+let gra = "ets2";
+const usa = () => gra === "ats";
+const J = {
+  v: (kmh) => usa() ? kmh * 0.621371 : kmh, v_j: () => usa() ? "MPH" : "KM/H",
+  d: (km) => usa() ? km * 0.621371 : km, d_j: () => usa() ? "mi" : "km",
+  obj: (l) => usa() ? l * 0.264172 : l, obj_j: () => usa() ? "gal" : "l",
+  spal: (l100) => usa() ? (l100 > 0 ? 235.215 / l100 : 0) : l100, spal_j: () => usa() ? "MPG" : "L/100",
+  cis: (bar) => usa() ? bar * 14.5038 : bar, cis_j: () => usa() ? "PSI" : "BAR", cis_max: () => usa() ? 145 : 10,
+  temp: (c) => usa() ? c * 9 / 5 + 32 : c, temp_j: () => usa() ? "°F" : "°C",
+  masa: (tony) => usa() ? `${liczba(tony * 2204.62)} lb` : `${liczba(tony, 1)} t`,
+  kasa: (x) => usa() ? `$${liczba(x)}` : `${liczba(x)} €`,
+};
+const liczba = (x, miejsc = 0) => Number(x).toLocaleString(jezyk === "pl" ? "pl-PL" : "en-US", { minimumFractionDigits: miejsc, maximumFractionDigits: miejsc });
+
+// ---------------- ikony przycisków ----------------
+const LAMPA = `<path d="M11 6v12C6.5 18 4 15.5 4 12s2.5-6 7-6z"/>`;
+const IKONY = {
+  mijania: LAMPA + `<path d="M14 8.5l6 2M14 12.5l6 2M14 16.5l6 2"/>`,
+  drogowe: LAMPA + `<path d="M14 8h7M14 12h7M14 16h7"/>`,
+  awaryjne: `<path d="M12 3.5l9 16H3z"/><path d="M12 9.5l4.2 7.5H7.8z"/>`,
+  kogut: `<path d="M7 17v-4a5 5 0 0 1 10 0v4"/><path d="M5 17h14v3H5z"/><path d="M12 2.5v3M4.5 5.5l2 2M19.5 5.5l-2 2M2.5 12h2M19.5 12h2"/>`,
+  lewy: `<path class="pelna" d="M2.5 12L10 5v4.5h11.5v5H10V19z"/>`,
+  prawy: `<path class="pelna" d="M21.5 12L14 5v4.5H2.5v5H14V19z"/>`,
+  zaplon: `<circle cx="7.5" cy="12" r="4"/><circle cx="7.5" cy="12" r="1.2" class="pelna"/><path d="M11.5 12H21M17 12v3M20 12v2"/>`,
+  silnik: `<path d="M3 10v6M3 13h2M5 9.5h3l1.5-2h5V10h2.5l2 2h1V9h1.5v8H20v-2.5h-1l-2 2.5H8l-3-3z"/><path d="M10 5h5M12.5 5v2.5"/>`,
+  reczny: `<circle cx="12" cy="12" r="6.5"/><path d="M4.8 6.3a9 9 0 0 0 0 11.4M19.2 6.3a9 9 0 0 1 0 11.4"/><path d="M10.3 15.5V8.5h2.4a2 2 0 0 1 0 4h-2.4"/>`,
+  wycieraczki: `<path d="M3 17.5a10.5 10.5 0 0 1 18 0z"/><path d="M12 17.5L7.5 8.5"/><path d="M9 4.5l-.5-1.5M12 4V2.5M15 4.5l.5-1.5"/>`,
+  tempomat: `<path d="M4.5 17a8 8 0 1 1 15 0"/><path d="M12 16l4.5-5"/><circle class="pelna" cx="12" cy="16" r="1.6"/><path d="M6.5 13h1.5M12 7.5V9M17.5 13H16"/>`,
+  kamera: `<path d="M3 8h4l2-2.5h6L17 8h4v11H3z"/><circle cx="12" cy="13" r="3.5"/>`,
+  radio: `<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8l10-4.5"/><circle cx="15.5" cy="14" r="3"/><path d="M6 12.5h4M6 15.5h4"/>`,
+  hamulec_silnikowy: `<path d="M4.8 6.3a9 9 0 0 0 0 11.4M19.2 6.3a9 9 0 0 1 0 11.4"/><rect x="6.5" y="7" width="11" height="10" rx="2"/><text x="12" y="14.6">EB</text>`,
+  przyczepa: `<path d="M2.5 7h12v8h-12z"/><path d="M14.5 13h3.5l3-2.5"/><circle cx="6" cy="17" r="1.8"/><circle cx="10.5" cy="17" r="1.8"/>`,
+  plus: `<circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/>`,
+  minus: `<circle cx="12" cy="12" r="8.5"/><path d="M8 12h8"/>`,
+};
+const ikonaSvg = (n) => IKONY[n] ? `<svg class="ikona" viewBox="0 0 24 24">${IKONY[n]}</svg>` : "";
+
+// ---------------- przyciski ----------------
+let profile = {};
+let widoczne = [];
+const stuknieto = {};
+const stany = (() => { try { return JSON.parse(wczytaj("stany", "{}")); } catch (e) { return {}; } })();
+const zapiszStany = () => zapisz("stany", JSON.stringify(stany));
+const polaczenie = (ok, tekst) => { $("polaczenie").classList.toggle("blad", !ok); $("polaczenie").querySelector("span").textContent = tekst; };
+
+async function wyslij(akcja, tryb) {
+  if (DEMO) return;
+  try {
+    const r = await fetch("/akcja", { method: "POST", body: JSON.stringify({ akcja, tryb }) });
+    if (r.status === 409) return polaczenie(false, t("nie_gra"));
+    if (!r.ok) throw new Error(r.status);
+    polaczenie(true, t("polaczono"));
+  } catch (e) { polaczenie(false, t("brak_pc")); }
+}
+const brzecz = () => navigator.vibrate && navigator.vibrate(15);
+
+function odswiezPrzycisk(el, p, klucz) {
+  const n = stany[klucz] || 0;
+  if (p.typ === "cykl") { el.querySelector(".stan").textContent = tp(p, "stany")[n]; el.classList.toggle("wl", n > 0); }
+  else if (p.typ === "przelacznik") { el.querySelector(".stan").textContent = n ? t("wl") : t("wyl"); el.classList.toggle("wl", !!n); }
+}
+
+function zbuduj() {
+  document.body.classList.toggle("ats", usa());
+  document.documentElement.lang = jezyk;
+  $("nazwa-gry").textContent = profile[gra]?.skrot || gra.toUpperCase();
+  document.title = `${profile[gra]?.skrot || ""} Truck Panel`;
+  // przełącznik gry (gdy gra nie działa, można obejrzeć drugą) i języka
+  $("gry").innerHTML = "";
+  for (const [k, pr] of Object.entries(profile)) {
+    if (k.startsWith("_")) continue;
+    const b = document.createElement("button");
+    b.textContent = pr.skrot; b.className = k === gra ? "aktywna" : "";
+    b.onclick = () => { gra = k; zapisz("gra", k); zbuduj(); };
+    $("gry").appendChild(b);
+  }
+  for (const b of $("jezyki").children) b.classList.toggle("aktywna", b.dataset.j === jezyk);
+  for (const el of document.querySelectorAll("[data-t]")) el.textContent = t(el.dataset.t);
+  $("zeruj").textContent = t("zeruj");
+  $("pelny").title = t("pelny");
+  odswiezPikanie();
+
+  const panel = $("przyciski");
+  panel.innerHTML = ""; widoczne = [];
+  const poziomo = matchMedia("(orientation: landscape)").matches;
+  for (const sekcja of profile[gra].sekcje) {
+    if (!sekcja.przyciski) continue;
+    const s = document.createElement("section");
+    const kolumny = (poziomo && sekcja.kolumny_poziomo) || sekcja.kolumny || 2;
+    s.style.setProperty("--kolumny", kolumny);
+    s.style.setProperty("--wiersze", Math.ceil(sekcja.przyciski.length / kolumny));
+    s.innerHTML = `<h2>${tp(sekcja, "tytul")}</h2><div class="siatka" style="grid-template-columns:repeat(${kolumny},1fr)"></div>`;
+    for (const p of sekcja.przyciski) s.querySelector(".siatka").appendChild(przycisk(p, sekcja.przyciski));
+    panel.appendChild(s);
+  }
+  ostatniGps = null;
+  if (ostatnieInfo !== undefined) pokazKlaster(ostatnieInfo);
+}
+
+function przycisk(p, sasiedzi) {
+  const klucz = `${gra}/${p.id}`;
+  const el = document.createElement("button");
+  el.className = `przycisk ${p.typ}` + (p.kolor ? ` kolor-${p.kolor}` : "") + (p.migaj ? " migaj" : "");
+  el.innerHTML = ikonaSvg(p.ikona) + `<div class="opis"><div>${tp(p, "etykieta")}</div><div class="stan">${p.typ === "trzymaj" ? t("trzymaj") : ""}</div></div>`;
+  odswiezPrzycisk(el, p, klucz);
+  widoczne.push({ el, p, klucz });
+  el.addEventListener("pointerdown", (e) => {
+    e.preventDefault(); el.setPointerCapture(e.pointerId); el.classList.add("wcisniety"); brzecz();
+    if (p.typ === "trzymaj") return void wyslij(klucz, "wcisnij");
+    // przełącznik z osobnym klawiszem wyłączania (np. silnik: E odpala, zapłon gasi)
+    wyslij(p.klawisz_wyl && stany[klucz] ? `${klucz}/wyl` : klucz, "stuknij");
+    stuknieto[klucz] = Date.now();
+    if (p.typ === "cykl") stany[klucz] = ((stany[klucz] || 0) + 1) % p.stany.length;
+    else if (p.typ === "przelacznik") {
+      stany[klucz] = stany[klucz] ? 0 : 1;
+      if (p.grupa && stany[klucz]) for (const inny of sasiedzi) if (inny !== p && inny.grupa === p.grupa) stany[`${gra}/${inny.id}`] = 0;
+    }
+    zapiszStany();
+    if (p.grupa) for (const w of widoczne) odswiezPrzycisk(w.el, w.p, w.klucz); else odswiezPrzycisk(el, p, klucz);
+  });
+  const koniec = () => { el.classList.remove("wcisniety"); if (p.typ === "trzymaj") wyslij(klucz, "pusc"); };
+  el.addEventListener("pointerup", koniec);
+  el.addEventListener("pointercancel", koniec);
+  el.addEventListener("contextmenu", (e) => e.preventDefault());
+  return el;
+}
+
+// ---------------- telemetria ----------------
+let ostatnieInfo;
+async function czytajTelemetrie() {
+  if (document.hidden) return pikanie(false);
+  let dane;
+  if (DEMO) dane = daneDemo();
+  else try { dane = (await (await fetch("/telemetria")).json()).ets2; } catch (e) { pokazKlaster(null); return pikanie(false); }
+  pokazKlaster(dane && dane.info);
+  if (!dane) return pikanie(false);
+  let zmiana = false;
+  for (const { el, p, klucz } of widoczne) {
+    if (!p.telemetria || !(p.telemetria in dane) || Date.now() - (stuknieto[klucz] || 0) < ZAUFAJ_STUKNIECIU_MS) continue;
+    const n = Number(dane[p.telemetria]);
+    if ((stany[klucz] || 0) !== n) { stany[klucz] = n; odswiezPrzycisk(el, p, klucz); zmiana = true; }
+  }
+  if (zmiana) zapiszStany();
+  pikanie(!!dane.cofanie);
+}
+
+const czasJazdy = (min) => min < 60 ? `${min} ${t("min")}` : `${Math.floor(min / 60)} ${t("h")} ${min % 60} ${t("min")}`;
+const godzinaGry = (min) => {
+  const h = Math.floor(min / 60) % 24, m = String(min % 60).padStart(2, "0"), d = t("dni")[Math.floor(min / 1440) % 7];
+  if (jezyk === "pl") return `${d} ${String(h).padStart(2, "0")}:${m}`;
+  return `${d} ${h % 12 || 12}:${m} ${h < 12 ? "am" : "pm"}`;
+};
+const ustawPasek = (id, u, kolor) => { const i = $(id); i.style.width = `${Math.max(0, Math.min(1, u)) * 100}%`; i.style.background = kolor || ""; };
+const stanKafla = (id, ostrz, alarm) => { $(id).classList.toggle("ostrzezenie", !!ostrz && !alarm); $(id).classList.toggle("alarm", !!alarm); };
+const flaga = (kod) => /^[A-Z]{2}$/.test(kod) && kod !== "XK" ? String.fromCodePoint(...[...kod].map(c => 0x1F1A5 + c.charCodeAt(0))) : "";
+function nazwaKraju(m) {
+  if (usa()) return jezyk === "en" ? (STANY_USA[m.kraj_kod] || m.kraj) : m.kraj;
+  try { return new Intl.DisplayNames([jezyk], { type: "region" }).of(m.kraj_kod) || m.kraj; } catch (e) { return m.kraj; }
+}
+
+// TRIP: przytrzymaj kafel przebiegu, żeby wyzerować
+let tripStart = Number(wczytaj("tripStart", 0)), ostatniPrzebieg = 0;
+(() => {
+  let tm = null;
+  $("k-przebieg").addEventListener("pointerdown", () => { tm = setTimeout(() => {
+    tripStart = ostatniPrzebieg; zapisz("tripStart", tripStart); navigator.vibrate && navigator.vibrate([40, 40, 40]);
+  }, 800); });
+  for (const z of ["pointerup", "pointercancel", "pointerleave"]) $("k-przebieg").addEventListener(z, () => clearTimeout(tm));
+})();
+
+let ostatniGps = null;
+function pokazKlaster(info) {
+  ostatnieInfo = info;
+  if (!info) {
+    $("zegar").innerHTML = ""; $("miejsce").innerHTML = "";
+    const g = `<h3>${t("gps")}</h3><div class="pusto">${t("czekam_dane")}</div>`;
+    if (g !== ostatniGps) { $("k-gps").innerHTML = g; ostatniGps = g; }
+    return;
+  }
+  const ostrz = new Set(info.ostrzezenia || []);
+  $("zegar").textContent = godzinaGry(info.czas_gry);
+  const m = info.miejsce;
+  $("miejsce").innerHTML = m ? `<span class="flaga">${usa() ? "🇺🇸" : flaga(m.kraj_kod)}</span><b>${nazwaKraju(m)}</b>` +
+    `<span>${m.odl_km <= 5 ? "" : t("kolo") + " "}${m.w_poblizu}</span>` : "";
+
+  // GPS
+  const maTrase = info.do_celu_km > 0;
+  let g;
+  if (!maTrase && !info.cel_miasto) g = `<h3>GPS</h3><div class="pusto">${t("brak_trasy")}</div>`;
+  else {
+    const przyjazd = info.czas_gry + info.do_celu_min, wiersze = [];
+    if (maTrase) wiersze.push([t("przyjazd"), godzinaGry(przyjazd)]);
+    if (info.na_zleceniu && info.termin > 0) {
+      const zapas = info.termin - przyjazd;
+      wiersze.push([t("termin"), `${godzinaGry(info.termin)} · <span class="${zapas < 0 ? "zle" : "ok"}">${zapas < 0 ? "−" : "+"}${czasJazdy(Math.abs(zapas))}</span>`]);
+    }
+    if (info.ladunek) wiersze.push([t("ladunek"), `${info.ladunek} · ${J.masa(info.masa_t)}`]);
+    if (info.zarobek > 0) wiersze.push([t("zarobek"), J.kasa(info.zarobek)]);
+    const dyst = J.d(info.do_celu_km);
+    const postep = info.trasa_km > 0 && maTrase ? 1 - info.do_celu_km / info.trasa_km : null;
+    g = `<h3>${t("gps")}${info.start_miasto ? ` · ${t("z")} ${info.start_miasto}` : ""}</h3>` +
+      (info.cel_miasto ? `<div class="cel">${info.cel_miasto}</div><div class="firma">${info.cel_firma || ""}</div>` : `<div class="cel">${t("punkt")}</div>`) +
+      `<div class="srodek">` +
+      (maTrase ? `<div><div class="km">${liczba(dyst, dyst < 10 ? 1 : 0)}<small>${J.d_j().toUpperCase()}</small></div>
+                  <div class="czas">${czasJazdy(info.do_celu_min)} ${t("jazdy")}</div></div>` : `<div class="pusto">${t("brak_trasy")}</div>`) +
+      `<div class="wiersze">${wiersze.map(([a, b]) => `<span>${a}</span><span>${b}</span>`).join("")}</div></div>` +
+      (postep !== null ? `<div class="pasek-wsk"><i style="width:${Math.max(0, Math.min(1, postep)) * 100}%"></i></div>` : "");
+  }
+  if (g !== ostatniGps) { $("k-gps").innerHTML = g; ostatniGps = g; }
+
+  // prędkość
+  const v = Math.round(J.v(info.kmh)), limit = Math.round(J.v(info.limit));
+  $("v-predkosc").innerHTML = `${v}<small>${J.v_j()}</small>`;
+  $("v-limit").textContent = info.limit > 0 ? limit : "";
+  $("v-limit").classList.toggle("brak", !(info.limit > 0));
+  $("k-predkosc").classList.toggle("za-szybko", info.limit > 0 && info.kmh > info.limit + 2);
+  const bieg = info.bieg < 0 ? `R${info.bieg < -1 ? -info.bieg : ""}` : info.bieg === 0 ? "N" : info.bieg;
+  $("v-bieg").innerHTML = `${t("bieg")} <b>${bieg}</b>` + (stany[`${gra}/tempomat`] ? ` · ${t("tempomat")} <b>${Math.round(J.v(info.tempomat_kmh))}</b>` : "");
+
+  // paliwo i spalanie
+  const u = info.paliwo_max > 0 ? info.paliwo_l / info.paliwo_max : 0;
+  $("v-paliwo").innerHTML = `${liczba(J.obj(info.paliwo_l))}<small>${J.obj_j().toUpperCase()}</small>`;
+  ustawPasek("p-paliwo", u, ostrz.has("paliwo") ? "var(--czerwony)" : u < 0.25 ? "var(--zolty)" : "");
+  $("v-paliwo2").innerHTML = `${t("z_ilu")} <b>${liczba(J.obj(info.paliwo_max))}</b> ${J.obj_j()} · <b>${Math.round(u * 100)}</b>%`;
+  stanKafla("k-paliwo", u < 0.25, ostrz.has("paliwo"));
+  $("v-spalanie").innerHTML = `${liczba(J.spal(info.spalanie_l100), 1)}<small>${J.spal_j()}</small>`;
+  const zaMalo = maTrase && info.zasieg_km < info.do_celu_km;
+  $("v-zasieg").innerHTML = `${t("zasieg")} <b>${liczba(J.d(info.zasieg_km))}</b> ${J.d_j()}` +
+    (maTrase ? ` · <span class="${zaMalo ? "zle" : "ok"}">${zaMalo ? t("tankuj") : t("dojedziesz")}</span>` : "");
+  stanKafla("k-spalanie", zaMalo, false);
+
+  // powietrze
+  $("v-powietrze").innerHTML = `${liczba(J.cis(info.powietrze_bar), usa() ? 0 : 1)}<small>${J.cis_j()}</small>`;
+  const alarmPow = ostrz.has("powietrze_alarm"), ostrzPow = ostrz.has("powietrze");
+  ustawPasek("p-powietrze", J.cis(info.powietrze_bar) / J.cis_max(), alarmPow ? "var(--czerwony)" : ostrzPow ? "var(--zolty)" : "var(--nieb)");
+  stanKafla("k-powietrze", ostrzPow, alarmPow);
+  $("v-olej").innerHTML = `${t("olej")} <b class="${ostrz.has("olej") ? "zle" : ""}">${liczba(J.cis(info.olej_bar), usa() ? 0 : 1)}</b> ${J.cis_j().toLowerCase()}` +
+    (info.zuzycie_proc > 0 ? ` · ${t("uszkodzenia")} <b class="${info.zuzycie_proc >= 10 ? "zle" : ""}">${info.zuzycie_proc}%</b>` : "");
+
+  // silnik
+  $("v-woda").innerHTML = `${Math.round(J.temp(info.woda_c))}°<small>${t("woda")}</small>`;
+  $("v-olejc").innerHTML = `${Math.round(J.temp(info.olej_c))}°<small>${t("olej")}</small>`;
+  $("v-aku").innerHTML = `${liczba(info.akumulator_v, 1)}<small>${t("akumulator")} V</small>`;
+  $("v-adblue").innerHTML = `${liczba(J.obj(info.adblue_l))}<small>${t("adblue")} ${J.obj_j()}</small>`;
+  $("v-woda").classList.toggle("zle", ostrz.has("woda"));
+  $("v-aku").classList.toggle("zle", ostrz.has("akumulator"));
+  $("v-adblue").classList.toggle("zle", ostrz.has("adblue"));
+  stanKafla("k-silnik", ["woda", "akumulator", "adblue", "olej"].some(o => ostrz.has(o)), false);
+
+  // przebieg + TRIP
+  ostatniPrzebieg = info.przebieg_km;
+  if (!tripStart || tripStart > info.przebieg_km) { tripStart = info.przebieg_km; zapisz("tripStart", tripStart); }
+  $("v-przebieg").innerHTML = `${liczba(Math.floor(J.d(info.przebieg_km)))}<small>${J.d_j().toUpperCase()}</small>`;
+  $("v-trip").innerHTML = `TRIP <b>${liczba(J.d(info.przebieg_km - tripStart), 1)}</b> ${J.d_j()} <small>(${t("trip_zeruj")})</small>`;
+}
+
+// ---------------- pikanie przy cofaniu ----------------
+let dzwiek = null, pikTimer = null, pikanieWl = wczytaj("pikanie", "1") !== "0";
+document.addEventListener("pointerdown", () => {
+  if (!dzwiek) dzwiek = new (window.AudioContext || window.webkitAudioContext)();
+  if (dzwiek.state === "suspended") dzwiek.resume();
+}, true);
+function pik() {
+  if (!dzwiek || dzwiek.state !== "running") return;
+  const c = dzwiek.currentTime, osc = dzwiek.createOscillator(), filtr = dzwiek.createBiquadFilter(), gn = dzwiek.createGain();
+  osc.type = "square"; osc.frequency.value = 1050; filtr.type = "lowpass"; filtr.frequency.value = 2500;
+  gn.gain.setValueAtTime(0, c); gn.gain.linearRampToValueAtTime(0.25, c + 0.01);
+  gn.gain.setValueAtTime(0.25, c + 0.45); gn.gain.linearRampToValueAtTime(0, c + 0.47);
+  osc.connect(filtr).connect(gn).connect(dzwiek.destination); osc.start(c); osc.stop(c + 0.5);
+}
+function pikanie(cofanie) {
+  const grac = cofanie && pikanieWl;
+  if (grac && !pikTimer) { pik(); pikTimer = setInterval(pik, 1000); }
+  if (!grac && pikTimer) { clearInterval(pikTimer); pikTimer = null; }
+}
+function odswiezPikanie() { $("pikanie").textContent = `${t("pikanie")}: ${pikanieWl ? t("wl") : t("wyl")}`; }
+$("pikanie").onclick = () => { pikanieWl = !pikanieWl; zapisz("pikanie", pikanieWl ? "1" : "0"); odswiezPikanie(); if (!pikanieWl) pikanie(false); };
+
+// ---------------- reszta obsługi ----------------
+for (const b of $("jezyki").children) b.onclick = () => { jezyk = b.dataset.j; zapisz("jezyk", jezyk); zbuduj(); };
+$("zeruj").onclick = () => { for (const k of Object.keys(stany)) if (k.startsWith(gra + "/")) delete stany[k]; zapiszStany(); zbuduj(); };
+$("pelny").onclick = () => {
+  if (document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen({ navigationUI: "hide" }).catch(() => {});
+};
+document.addEventListener("visibilitychange", () => { if (document.hidden) wyslij("", "pusc_wszystko"); });
+matchMedia("(orientation: landscape)").addEventListener("change", () => zbuduj());
+
+// panel sam przechodzi na grę, która działa na PC
+let ostatniaGra = null;
+async function sprawdzGre() {
+  if (DEMO) return polaczenie(true, "DEMO");
+  try {
+    const { gra: g } = await (await fetch("/gra")).json();
+    if (g && g !== ostatniaGra && profile[g]) { gra = g; zapisz("gra", g); zbuduj(); }
+    ostatniaGra = g;
+    polaczenie(true, g ? t("polaczono") : t("czekam"));
+  } catch (e) { ostatniaGra = null; polaczenie(false, t("brak_pc")); }
+}
+
+// ?demo = wymyślone dane do obejrzenia wyglądu bez gry
+let demoKm = 412.6, demoPrzebieg = 184213.4;
+function daneDemo() {
+  demoKm = Math.max(0, demoKm - 0.024); demoPrzebieg += 0.024;
+  const s = Date.now() / 1000;
+  const m = usa() ? { kraj_kod: "NV", kraj: "Nevada", w_poblizu: "Las Vegas", odl_km: 14 } : { kraj_kod: "PL", kraj: "Polska", w_poblizu: "Poznań", odl_km: 12 };
+  return { swiatla: 2, drogowe: 0, awaryjne: 0, kogut: 0, lewy: Math.floor(s / 6) % 3 === 0 ? 1 : 0, prawy: 0, zaplon: 1, silnik: 1,
+    hamulec_silnikowy: 0, tempomat: 1, cofanie: 0, info: {
+    kmh: Math.round(84 + 4 * Math.sin(s / 3)), limit: 80, tempomat_kmh: 85, bieg: 12, obroty: 1240, obroty_max: 2500,
+    paliwo_l: 523, paliwo_max: 1200, spalanie_l100: 31.4, zasieg_km: 1665, adblue_l: 61, adblue_max: 80,
+    powietrze_bar: 8.4 + 0.3 * Math.sin(s / 5), olej_bar: 4.6, olej_c: 92, woda_c: 86, akumulator_v: 25.2, zuzycie_proc: 3,
+    przebieg_km: demoPrzebieg, do_celu_km: Math.round(demoKm * 10) / 10, do_celu_min: Math.round(demoKm / 72 * 60),
+    czas_gry: 2 * 1440 + 14 * 60 + 25, termin: 3 * 1440 + 2 * 60, trasa_km: 655, na_zleceniu: true, masa_t: 18.4, zarobek: 14820,
+    ladunek: usa() ? "Construction Materials" : "Elementy konstrukcyjne", cel_miasto: usa() ? "Phoenix" : "Wrocław",
+    cel_firma: usa() ? "Bushnell Farms" : "Stokes", start_miasto: usa() ? "Las Vegas" : "Berlin", ostrzezenia: [], miejsce: m } };
+}
+
+fetch("/profile.json").then(r => r.json()).then(p => {
+  profile = p;
+  const zAdresu = location.pathname.replace("/", "");
+  gra = profile[zAdresu] ? zAdresu : (profile[wczytaj("gra", "ets2")] ? wczytaj("gra", "ets2") : "ets2");
+  zbuduj(); sprawdzGre(); czytajTelemetrie();
+  setInterval(sprawdzGre, 3000);
+  setInterval(czytajTelemetrie, TELEMETRIA_MS);
+});
+</script>
+</body>
+</html>

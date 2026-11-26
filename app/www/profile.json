@@ -1,0 +1,431 @@
+{
+ "_info": "Klawisze = nazwy z KLAWISZE w serwer.py. Kombinacje jako lista, np. [\"ctrl\", \"insert\"]. typ: przelacznik (stan wl/wyl), cykl (kolejne stany), chwila (jedno klikniecie), trzymaj (wcisniety, dopoki trzymasz palec). ikona: nazwa z IKONY w panel.html. telemetria: stan brany z gry (wtyczka scs-telemetry.dll), klucz z POLA_ETS2 w serwer.py. Pola *_en = wersja angielska.",
+ "ets2": {
+  "nazwa": "Euro Truck Simulator 2",
+  "skrot": "ETS 2",
+  "sekcje": [
+   {
+    "tytul": "Światła",
+    "przyciski": [
+     {
+      "id": "swiatla",
+      "ikona": "mijania",
+      "telemetria": "swiatla",
+      "etykieta": "Światła",
+      "typ": "cykl",
+      "stany": [
+       "WYŁ",
+       "POSTÓJ",
+       "MIJANIA"
+      ],
+      "klawisz": [
+       "l"
+      ],
+      "etykieta_en": "Lights",
+      "stany_en": [
+       "OFF",
+       "PARKING",
+       "LOW BEAM"
+      ]
+     },
+     {
+      "id": "drogowe",
+      "ikona": "drogowe",
+      "telemetria": "drogowe",
+      "etykieta": "Drogowe",
+      "typ": "przelacznik",
+      "klawisz": [
+       "k"
+      ],
+      "kolor": "niebieski",
+      "etykieta_en": "High beam"
+     },
+     {
+      "id": "awaryjne",
+      "ikona": "awaryjne",
+      "telemetria": "awaryjne",
+      "etykieta": "Awaryjne",
+      "typ": "przelacznik",
+      "klawisz": [
+       "f"
+      ],
+      "kolor": "czerwony",
+      "migaj": true,
+      "etykieta_en": "Hazards"
+     },
+     {
+      "id": "kogut",
+      "ikona": "kogut",
+      "telemetria": "kogut",
+      "etykieta": "Kogut",
+      "typ": "przelacznik",
+      "klawisz": [
+       "o"
+      ],
+      "kolor": "zolty",
+      "migaj": true,
+      "etykieta_en": "Beacon"
+     },
+     {
+      "id": "lewy",
+      "ikona": "lewy",
+      "telemetria": "lewy",
+      "etykieta": "Lewy",
+      "typ": "przelacznik",
+      "klawisz": [
+       "lbracket"
+      ],
+      "kolor": "pomaranczowy",
+      "migaj": true,
+      "grupa": "kier",
+      "etykieta_en": "Left"
+     },
+     {
+      "id": "prawy",
+      "ikona": "prawy",
+      "telemetria": "prawy",
+      "etykieta": "Prawy",
+      "typ": "przelacznik",
+      "klawisz": [
+       "rbracket"
+      ],
+      "kolor": "pomaranczowy",
+      "migaj": true,
+      "grupa": "kier",
+      "etykieta_en": "Right"
+     }
+    ],
+    "tytul_en": "Lights"
+   },
+   {
+    "tytul": "Kabina",
+    "przyciski": [
+     {
+      "id": "zaplon",
+      "ikona": "zaplon",
+      "telemetria": "zaplon",
+      "etykieta": "Zapłon",
+      "typ": "przelacznik",
+      "klawisz": [
+       "backslash"
+      ],
+      "kolor": "pomaranczowy",
+      "etykieta_en": "Ignition"
+     },
+     {
+      "id": "silnik",
+      "ikona": "silnik",
+      "telemetria": "silnik",
+      "etykieta": "Silnik",
+      "typ": "przelacznik",
+      "klawisz": [
+       "e"
+      ],
+      "kolor": "zielony",
+      "etykieta_en": "Engine"
+     },
+     {
+      "id": "hamulec_silnikowy",
+      "ikona": "hamulec_silnikowy",
+      "telemetria": "hamulec_silnikowy",
+      "etykieta": "Hamulec silnikowy",
+      "typ": "przelacznik",
+      "klawisz": [
+       "j"
+      ],
+      "kolor": "zolty",
+      "etykieta_en": "Engine brake"
+     },
+     {
+      "id": "wycieraczki",
+      "ikona": "wycieraczki",
+      "etykieta": "Wycieraczki",
+      "typ": "cykl",
+      "stany": [
+       "WYŁ",
+       "1",
+       "2",
+       "3"
+      ],
+      "klawisz": [
+       "p"
+      ],
+      "etykieta_en": "Wipers",
+      "stany_en": [
+       "OFF",
+       "1",
+       "2",
+       "3"
+      ]
+     },
+     {
+      "id": "kamera",
+      "ikona": "kamera",
+      "etykieta": "Kamera",
+      "typ": "chwila",
+      "klawisz": [
+       "9"
+      ],
+      "etykieta_en": "Camera"
+     }
+    ],
+    "tytul_en": "Cab"
+   },
+   {
+    "tytul": "Tempomat i radio",
+    "kolumny": 3,
+    "kolumny_poziomo": 1,
+    "przyciski": [
+     {
+      "id": "tempomat",
+      "ikona": "tempomat",
+      "telemetria": "tempomat",
+      "etykieta": "Tempomat",
+      "typ": "przelacznik",
+      "klawisz": [
+       "c"
+      ],
+      "kolor": "zielony",
+      "etykieta_en": "Cruise"
+     },
+     {
+      "id": "tempomat_wznow",
+      "ikona": "tempomat",
+      "etykieta": "Wznów",
+      "typ": "chwila",
+      "klawisz": [
+       "slash"
+      ],
+      "etykieta_en": "Resume"
+     },
+     {
+      "id": "radio",
+      "ikona": "radio",
+      "etykieta": "Radio",
+      "typ": "przelacznik",
+      "klawisz": [
+       "f8"
+      ],
+      "kolor": "zielony",
+      "etykieta_en": "Radio"
+     }
+    ],
+    "tytul_en": "Cruise & radio"
+   }
+  ]
+ },
+ "ats": {
+  "nazwa": "American Truck Simulator",
+  "skrot": "ATS",
+  "sekcje": [
+   {
+    "tytul": "Światła",
+    "przyciski": [
+     {
+      "id": "swiatla",
+      "ikona": "mijania",
+      "telemetria": "swiatla",
+      "etykieta": "Światła",
+      "typ": "cykl",
+      "stany": [
+       "WYŁ",
+       "POSTÓJ",
+       "MIJANIA"
+      ],
+      "klawisz": [
+       "l"
+      ],
+      "etykieta_en": "Lights",
+      "stany_en": [
+       "OFF",
+       "PARKING",
+       "LOW BEAM"
+      ]
+     },
+     {
+      "id": "drogowe",
+      "ikona": "drogowe",
+      "telemetria": "drogowe",
+      "etykieta": "Drogowe",
+      "typ": "przelacznik",
+      "klawisz": [
+       "k"
+      ],
+      "kolor": "niebieski",
+      "etykieta_en": "High beam"
+     },
+     {
+      "id": "awaryjne",
+      "ikona": "awaryjne",
+      "telemetria": "awaryjne",
+      "etykieta": "Awaryjne",
+      "typ": "przelacznik",
+      "klawisz": [
+       "f"
+      ],
+      "kolor": "czerwony",
+      "migaj": true,
+      "etykieta_en": "Hazards"
+     },
+     {
+      "id": "kogut",
+      "ikona": "kogut",
+      "telemetria": "kogut",
+      "etykieta": "Kogut",
+      "typ": "przelacznik",
+      "klawisz": [
+       "o"
+      ],
+      "kolor": "zolty",
+      "migaj": true,
+      "etykieta_en": "Beacon"
+     },
+     {
+      "id": "lewy",
+      "ikona": "lewy",
+      "telemetria": "lewy",
+      "etykieta": "Lewy",
+      "typ": "przelacznik",
+      "klawisz": [
+       "lbracket"
+      ],
+      "kolor": "pomaranczowy",
+      "migaj": true,
+      "grupa": "kier",
+      "etykieta_en": "Left"
+     },
+     {
+      "id": "prawy",
+      "ikona": "prawy",
+      "telemetria": "prawy",
+      "etykieta": "Prawy",
+      "typ": "przelacznik",
+      "klawisz": [
+       "rbracket"
+      ],
+      "kolor": "pomaranczowy",
+      "migaj": true,
+      "grupa": "kier",
+      "etykieta_en": "Right"
+     }
+    ],
+    "tytul_en": "Lights"
+   },
+   {
+    "tytul": "Kabina",
+    "przyciski": [
+     {
+      "id": "zaplon",
+      "ikona": "zaplon",
+      "telemetria": "zaplon",
+      "etykieta": "Zapłon",
+      "typ": "przelacznik",
+      "klawisz": [
+       "backslash"
+      ],
+      "kolor": "pomaranczowy",
+      "etykieta_en": "Ignition"
+     },
+     {
+      "id": "silnik",
+      "ikona": "silnik",
+      "telemetria": "silnik",
+      "etykieta": "Silnik",
+      "typ": "przelacznik",
+      "klawisz": [
+       "e"
+      ],
+      "kolor": "zielony",
+      "etykieta_en": "Engine"
+     },
+     {
+      "id": "hamulec_silnikowy",
+      "ikona": "hamulec_silnikowy",
+      "telemetria": "hamulec_silnikowy",
+      "etykieta": "Hamulec silnikowy",
+      "typ": "przelacznik",
+      "klawisz": [
+       "j"
+      ],
+      "kolor": "zolty",
+      "etykieta_en": "Engine brake"
+     },
+     {
+      "id": "wycieraczki",
+      "ikona": "wycieraczki",
+      "etykieta": "Wycieraczki",
+      "typ": "cykl",
+      "stany": [
+       "WYŁ",
+       "1",
+       "2",
+       "3"
+      ],
+      "klawisz": [
+       "p"
+      ],
+      "etykieta_en": "Wipers",
+      "stany_en": [
+       "OFF",
+       "1",
+       "2",
+       "3"
+      ]
+     },
+     {
+      "id": "kamera",
+      "ikona": "kamera",
+      "etykieta": "Kamera",
+      "typ": "chwila",
+      "klawisz": [
+       "9"
+      ],
+      "etykieta_en": "Camera"
+     }
+    ],
+    "tytul_en": "Cab"
+   },
+   {
+    "tytul": "Tempomat i radio",
+    "kolumny": 3,
+    "kolumny_poziomo": 1,
+    "przyciski": [
+     {
+      "id": "tempomat",
+      "ikona": "tempomat",
+      "telemetria": "tempomat",
+      "etykieta": "Tempomat",
+      "typ": "przelacznik",
+      "klawisz": [
+       "c"
+      ],
+      "kolor": "zielony",
+      "etykieta_en": "Cruise"
+     },
+     {
+      "id": "tempomat_wznow",
+      "ikona": "tempomat",
+      "etykieta": "Wznów",
+      "typ": "chwila",
+      "klawisz": [
+       "slash"
+      ],
+      "etykieta_en": "Resume"
+     },
+     {
+      "id": "radio",
+      "ikona": "radio",
+      "etykieta": "Radio",
+      "typ": "przelacznik",
+      "klawisz": [
+       "f8"
+      ],
+      "kolor": "zielony",
+      "etykieta_en": "Radio"
+     }
+    ],
+    "tytul_en": "Cruise & radio"
+   }
+  ]
+ }
+}
