@@ -1,16 +1,18 @@
 # Garaż Kuby Truck Panel (ETS 2 / ATS)
 
 **Darmowy panel na telefon albo tablet do Euro Truck Simulator 2 i American Truck Simulator.**
-Przyciski jak w kabinie (światła, kierunki, awaryjne, zapłon, silnik, hamulec silnikowy, tempomat, kamera, radio)
+Przyciski jak w kabinie (światła, kierunki, awaryjne, zapłon, silnik, hamulec silnikowy, hamulec ręczny, naczepa, tempomat, kamera, radio)
 i deska z danymi prosto z gry: GPS do celu, prędkość z ograniczeniem, paliwo, powietrze, temperatury, przebieg.
 
 Na telefonie nic nie instalujesz: panel działa w zwykłej przeglądarce (Chrome, Brave, Safari).
 
+> 🆕 **v0.1.1:** doszły przyciski **Ręczny** i **Naczepa** (podepnij/odepnij). Oba działają po przytrzymaniu, żeby nie włączyć ich przypadkiem w trasie. Poprawiony też widok w pionie. [Pobierz nową wersję](https://github.com/GarazKuby87/garazkuby-truck-panel/releases/latest).
+
 ![Panel w ETS 2](podglad/ets2.png)
 
-| ATS (mile, galony, dolary) | Strona startowa na komputerze |
-|---|---|
-| ![Panel w ATS](podglad/ats.png) | ![Strona startowa z kodem QR](podglad/start.png) |
+| ATS (mile, galony, dolary) | Tablet w pionie | Strona startowa na komputerze |
+|---|---|---|
+| ![Panel w ATS](podglad/ats.png) | ![Panel w pionie](podglad/ets2_pion.png) | ![Strona startowa z kodem QR](podglad/start.png) |
 
 *A free phone/tablet dashboard for ETS 2 and ATS: cab switches plus live telemetry, PL/EN switch at the top. [English below](#english).*
 
