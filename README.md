@@ -84,6 +84,7 @@ W grze wejdź w **Opcje → Sterowanie**, znajdź akcję i przypisz klawisz:
 | Radio | Radio (*Radio*) | `F8` |
 
 Przycisk **Silnik** to rozruch (`E`, domyślny klawisz gry). Silnik gaśnie, gdy wyłączysz **Zapłon**.
+**Ręczny** (`Spacja`) i **Naczepa** (`T`, podepnij/odepnij) to domyślne klawisze gry. Jeśli masz je na kierownicy, dopisz klawisz w drugim polu.
 
 **Masz kierownicę albo panel przycisków (PXN, Moza, Fanatec, Thrustmaster...)?**
 Gdy w grze przypisujesz akcję do przycisku kierownicy, gra często usuwa przy tym klawisz z klawiatury.
@@ -145,7 +146,7 @@ cab switches (lights, indicators, hazards, ignition, engine, engine brake, cruis
 5. Start the game. Buttons work while the game window is active.
 
 Bind once in *Options → Controls*: Electricity/ignition `\` (key above Enter), Engine brake toggle `J`, Cycle cameras `9`,
-Cruise control resume `/`, Radio `F8`. Using a wheel or button box? Add the keyboard key in the second (alternative) slot,
+Cruise control resume `/`, Radio `F8`. Parking brake (`Space`) and trailer attach/detach (`T`) use the game's default keys. Using a wheel or button box? Add the keyboard key in the second (alternative) slot,
 the game often removes it when you bind a wheel button.
 
 Not affiliated with SCS Software. License: GPL-3.0.
