@@ -108,6 +108,10 @@
   @keyframes miganie { 50% { background: var(--plyta-2); border-color: var(--rama-jasna); box-shadow: none; color: var(--tekst); } }
   .chwila .ikona, .trzymaj .ikona { color: var(--tekst); }
   .przycisk.chwila, .przycisk.trzymaj { border-left: 4px solid var(--akcent); }
+  .przycisk.laduje::after { content: ""; position: absolute; left: 0; bottom: 0; height: 5px; width: 100%;
+                            background: var(--k); transform-origin: left; animation: laduj var(--czas, 600ms) linear forwards; }
+  .przycisk.chwila.laduje::after { background: var(--akcent); }
+  @keyframes laduj { from { transform: scaleX(0); } to { transform: scaleX(1); } }
   .mini { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; min-height: 0; min-width: 0; }
   .mini .przycisk { gap: 5px; padding: 3px 7px; font-size: 14px; letter-spacing: 0; }
   .mini .ikona { width: 21px; height: 21px; }
@@ -395,12 +399,23 @@ function przycisk(p, sasiedzi) {
   const klucz = `${gra}/${p.id}`;
   const el = document.createElement("button");
   el.className = `przycisk ${p.typ}` + (p.kolor ? ` kolor-${p.kolor}` : "") + (p.migaj ? " migaj" : "");
-  el.innerHTML = ikonaSvg(p.ikona) + `<div class="opis"><div>${tp(p, "etykieta")}</div><div class="stan">${p.typ === "trzymaj" ? t("trzymaj") : ""}</div></div>`;
+  el.innerHTML = ikonaSvg(p.ikona) + `<div class="opis"><div>${tp(p, "etykieta")}</div><div class="stan">${p.typ === "trzymaj" ? t("trzymaj") : p.przytrzymaj ? t("trzymaj") : ""}</div></div>`;
+  if (p.przytrzymaj) el.style.setProperty("--czas", `${p.przytrzymaj}ms`);
   odswiezPrzycisk(el, p, klucz);
   widoczne.push({ el, p, klucz });
+  let czekaj = null;
   el.addEventListener("pointerdown", (e) => {
     e.preventDefault(); el.setPointerCapture(e.pointerId); el.classList.add("wcisniety"); brzecz();
     if (p.typ === "trzymaj") return void wyslij(klucz, "wcisnij");
+    // przytrzymaj: akcja dopiero po p.przytrzymaj ms (np. ręczny), przypadkowe puknięcie nic nie robi
+    if (p.przytrzymaj) {
+      el.classList.add("laduje");
+      czekaj = setTimeout(() => { czekaj = null; el.classList.remove("laduje"); brzecz(); wykonaj(); }, p.przytrzymaj);
+      return;
+    }
+    wykonaj();
+  });
+  const wykonaj = () => {
     // przełącznik z osobnym klawiszem wyłączania (np. silnik: E odpala, zapłon gasi)
     wyslij(p.klawisz_wyl && stany[klucz] ? `${klucz}/wyl` : klucz, "stuknij");
     stuknieto[klucz] = Date.now();
@@ -411,8 +426,12 @@ function przycisk(p, sasiedzi) {
     }
     zapiszStany();
     if (p.grupa) for (const w of widoczne) odswiezPrzycisk(w.el, w.p, w.klucz); else odswiezPrzycisk(el, p, klucz);
-  });
-  const koniec = () => { el.classList.remove("wcisniety"); if (p.typ === "trzymaj") wyslij(klucz, "pusc"); };
+  };
+  const koniec = () => {
+    el.classList.remove("wcisniety", "laduje");
+    if (czekaj) { clearTimeout(czekaj); czekaj = null; }
+    if (p.typ === "trzymaj") wyslij(klucz, "pusc");
+  };
   el.addEventListener("pointerup", koniec);
   el.addEventListener("pointercancel", koniec);
   el.addEventListener("contextmenu", (e) => e.preventDefault());

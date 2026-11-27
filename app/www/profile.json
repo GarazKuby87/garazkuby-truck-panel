@@ -1,5 +1,5 @@
 {
- "_info": "Klawisze = nazwy z KLAWISZE w serwer.py. Kombinacje jako lista, np. [\"ctrl\", \"insert\"]. typ: przelacznik (stan wl/wyl), cykl (kolejne stany), chwila (jedno klikniecie), trzymaj (wcisniety, dopoki trzymasz palec). ikona: nazwa z IKONY w panel.html. telemetria: stan brany z gry (wtyczka scs-telemetry.dll), klucz z POLA_ETS2 w serwer.py. Pola *_en = wersja angielska. maly: true = mały przycisk; kolejne małe dzielą jedną komórkę siatki.",
+ "_info": "Klawisze = nazwy z KLAWISZE w serwer.py. Kombinacje jako lista, np. [\"ctrl\", \"insert\"]. typ: przelacznik (stan wl/wyl), cykl (kolejne stany), chwila (jedno klikniecie), trzymaj (wcisniety, dopoki trzymasz palec). ikona: nazwa z IKONY w panel.html. telemetria: stan brany z gry (wtyczka scs-telemetry.dll), klucz z POLA_ETS2 w serwer.py. Pola *_en = wersja angielska. maly: true = mały przycisk; kolejne małe dzielą jedną komórkę siatki. przytrzymaj: ms = akcja dopiero po przytrzymaniu (zabezpieczenie przed przypadkowym puknięciem).",
  "ets2": {
   "nazwa": "Euro Truck Simulator 2",
   "skrot": "ETS 2",
@@ -179,7 +179,8 @@
       ],
       "kolor": "czerwony",
       "maly": true,
-      "etykieta_en": "P-Brake"
+      "etykieta_en": "P-Brake",
+      "przytrzymaj": 600
      },
      {
       "id": "przyczepa",
@@ -190,7 +191,8 @@
        "t"
       ],
       "maly": true,
-      "etykieta_en": "Trailer"
+      "etykieta_en": "Trailer",
+      "przytrzymaj": 600
      }
     ],
     "tytul_en": "Cab"
@@ -417,7 +419,8 @@
       ],
       "kolor": "czerwony",
       "maly": true,
-      "etykieta_en": "P-Brake"
+      "etykieta_en": "P-Brake",
+      "przytrzymaj": 600
      },
      {
       "id": "przyczepa",
@@ -428,7 +431,8 @@
        "t"
       ],
       "maly": true,
-      "etykieta_en": "Trailer"
+      "etykieta_en": "Trailer",
+      "przytrzymaj": 600
      }
     ],
     "tytul_en": "Cab"
