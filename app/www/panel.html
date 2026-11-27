@@ -72,7 +72,13 @@
     #przyciski { flex-direction: row; gap: 14px; }
     #przyciski section { flex: var(--kolumny); }
   }
-  @media (orientation: portrait) { #przyciski { flex: 1; } }
+  @media (orientation: portrait) {
+    #przyciski { flex: 1 1 0; gap: 6px; }
+    main { gap: 8px; }
+    .siatka { gap: 7px; }
+    #klaster { gap: 8px; }
+    .kafel h3 { font-size: 12px; letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  }
 
   /* ---- przycisk: spokojna płytka; włączony = cały świeci kolorem kontrolki ---- */
   .przycisk {
@@ -102,13 +108,18 @@
   @keyframes miganie { 50% { background: var(--plyta-2); border-color: var(--rama-jasna); box-shadow: none; color: var(--tekst); } }
   .chwila .ikona, .trzymaj .ikona { color: var(--tekst); }
   .przycisk.chwila, .przycisk.trzymaj { border-left: 4px solid var(--akcent); }
+  .mini { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; min-height: 0; min-width: 0; }
+  .mini .przycisk { gap: 5px; padding: 3px 7px; font-size: 14px; letter-spacing: 0; }
+  .mini .ikona { width: 21px; height: 21px; }
+  .mini .opis > div:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mini .stan { font-size: 10px; letter-spacing: 1px; }
   .kolor-czerwony { --k: var(--czerwony); } .kolor-niebieski { --k: var(--nieb); }
   .kolor-zolty { --k: var(--zolty); } .kolor-zielony { --k: var(--zielony); } .kolor-pomaranczowy { --k: var(--pomaranczowy); }
 
   /* ---- klaster: GPS + deska ---- */
   #klaster { flex: 1; display: grid; min-height: 0; gap: 10px; grid-template-columns: 1.9fr 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; }
   @media (orientation: portrait) {
-    #klaster { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1.3fr 1fr 1fr; }
+    #klaster { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: auto 1fr 1fr; flex: 1.2 1 0; }
     #klaster .gps { grid-column: 1 / -1; grid-row: auto; }
   }
   .kafel { position: relative; min-width: 0; min-height: 0; overflow: hidden; border-radius: 12px; padding: 10px 14px;
@@ -359,9 +370,21 @@ function zbuduj() {
     const s = document.createElement("section");
     const kolumny = (poziomo && sekcja.kolumny_poziomo) || sekcja.kolumny || 2;
     s.style.setProperty("--kolumny", kolumny);
-    s.style.setProperty("--wiersze", Math.ceil(sekcja.przyciski.length / kolumny));
+    // małe przyciski (maly: true) stojące obok siebie dzielą jedną komórkę siatki
+    const komorki = [];
+    for (const p of sekcja.przyciski) {
+      const ost = komorki[komorki.length - 1];
+      if (p.maly && Array.isArray(ost)) ost.push(p); else komorki.push(p.maly ? [p] : p);
+    }
+    s.style.setProperty("--wiersze", Math.ceil(komorki.length / kolumny));
     s.innerHTML = `<h2>${tp(sekcja, "tytul")}</h2><div class="siatka" style="grid-template-columns:repeat(${kolumny},1fr)"></div>`;
-    for (const p of sekcja.przyciski) s.querySelector(".siatka").appendChild(przycisk(p, sekcja.przyciski));
+    for (const k of komorki) {
+      if (!Array.isArray(k)) { s.querySelector(".siatka").appendChild(przycisk(k, sekcja.przyciski)); continue; }
+      const para = document.createElement("div");
+      para.className = "mini";
+      for (const p of k) para.appendChild(przycisk(p, sekcja.przyciski));
+      s.querySelector(".siatka").appendChild(para);
+    }
     panel.appendChild(s);
   }
   ostatniGps = null;
