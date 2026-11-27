@@ -74,6 +74,8 @@
   }
   @media (orientation: portrait) {
     #przyciski { flex: 1 1 0; gap: 6px; }
+    /* nagłówek sekcji ma stałą wysokość, reszta dzielona po równo na rzędy przycisków */
+    #przyciski section { flex: var(--wiersze) 1 22px; }
     main { gap: 8px; }
     .siatka { gap: 7px; }
     #klaster { gap: 8px; }
